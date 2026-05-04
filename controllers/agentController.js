@@ -1,5 +1,6 @@
 const donationService = require("../services/donationService.js");
 const userService = require("../services/userService.js");
+const auditService = require("../services/auditService.js");
 
 const agentController = {
 	async getDashboard(req, res) {
@@ -50,6 +51,14 @@ const agentController = {
 		try {
 			const collectionId = req.params.collectionId;
 			await donationService.updateStatus(collectionId, "collected", { collectionTime: Date.now() });
+			await auditService.log({
+				action: "donation_collected",
+				performedBy: req.user._id,
+				targetModel: "donation",
+				targetId: collectionId,
+				newState: { status: "collected" },
+				ipAddress: req.ip
+			});
 			req.flash("success", "Donation collected successfully");
 			res.redirect(`/agent/collection/view/${collectionId}`);
 		} catch (err) {

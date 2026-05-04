@@ -1,5 +1,6 @@
 const donationService = require("../services/donationService.js");
 const userService = require("../services/userService.js");
+const auditService = require("../services/auditService.js");
 
 const adminController = {
 	async getDashboard(req, res) {
@@ -57,7 +58,18 @@ const adminController = {
 	async acceptDonation(req, res) {
 		try {
 			const donationId = req.params.donationId;
+			const donation = await donationService.findById(donationId);
+			const previousStatus = donation?.status;
 			await donationService.updateStatus(donationId, "accepted");
+			await auditService.log({
+				action: "donation_accepted",
+				performedBy: req.user._id,
+				targetModel: "donation",
+				targetId: donationId,
+				previousState: { status: previousStatus },
+				newState: { status: "accepted" },
+				ipAddress: req.ip
+			});
 			req.flash("success", "Donation accepted successfully");
 			res.redirect(`/admin/donation/view/${donationId}`);
 		} catch (err) {
@@ -70,7 +82,18 @@ const adminController = {
 	async rejectDonation(req, res) {
 		try {
 			const donationId = req.params.donationId;
+			const donation = await donationService.findById(donationId);
+			const previousStatus = donation?.status;
 			await donationService.updateStatus(donationId, "rejected");
+			await auditService.log({
+				action: "donation_rejected",
+				performedBy: req.user._id,
+				targetModel: "donation",
+				targetId: donationId,
+				previousState: { status: previousStatus },
+				newState: { status: "rejected" },
+				ipAddress: req.ip
+			});
 			req.flash("success", "Donation rejected successfully");
 			res.redirect(`/admin/donation/view/${donationId}`);
 		} catch (err) {
@@ -99,6 +122,15 @@ const adminController = {
 			const donationId = req.params.donationId;
 			const { agent, adminToAgentMsg } = req.body;
 			await donationService.updateStatus(donationId, "assigned", { agent, adminToAgentMsg });
+			await auditService.log({
+				action: "donation_assigned",
+				performedBy: req.user._id,
+				targetModel: "donation",
+				targetId: donationId,
+				newState: { status: "assigned", agent },
+				details: { agentId: agent, message: adminToAgentMsg || null },
+				ipAddress: req.ip
+			});
 			req.flash("success", "Agent assigned successfully");
 			res.redirect(`/admin/donation/view/${donationId}`);
 		} catch (err) {
@@ -126,6 +158,14 @@ const adminController = {
 	async updateProfile(req, res) {
 		try {
 			await userService.updateProfile(req.user._id, req.validatedBody);
+			await auditService.log({
+				action: "profile_updated",
+				performedBy: req.user._id,
+				targetModel: "user",
+				targetId: req.user._id,
+				details: { updatedFields: Object.keys(req.validatedBody) },
+				ipAddress: req.ip
+			});
 			req.flash("success", "Profile updated successfully");
 			res.redirect("/admin/profile");
 		} catch (err) {

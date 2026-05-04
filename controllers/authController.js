@@ -1,4 +1,5 @@
 const userService = require("../services/userService.js");
+const auditService = require("../services/auditService.js");
 
 const authController = {
 	getSignup(req, res) {
@@ -18,7 +19,15 @@ const authController = {
 				});
 			}
 
-			await userService.createUser({ firstName, lastName, email, password: password1, role });
+			const newUser = await userService.createUser({ firstName, lastName, email, password: password1, role });
+			await auditService.log({
+				action: "user_registered",
+				performedBy: newUser._id,
+				targetModel: "user",
+				targetId: newUser._id,
+				details: { email, role },
+				ipAddress: req.ip
+			});
 			req.flash("success", "You are successfully registered and can log in.");
 			res.redirect("/auth/login");
 		} catch (err) {
@@ -32,15 +41,33 @@ const authController = {
 		res.render("auth/login", { title: "User login" });
 	},
 
-	postLoginRedirect(req, res) {
+	async postLoginRedirect(req, res) {
+		await auditService.log({
+			action: "user_login",
+			performedBy: req.user._id,
+			targetModel: "user",
+			targetId: req.user._id,
+			details: { role: req.user.role },
+			ipAddress: req.ip
+		});
 		res.redirect(req.session.returnTo || `/${req.user.role}/dashboard`);
 	},
 
 	logout(req, res) {
-		req.logout(function (err) {
+		const userId = req.user?._id;
+		req.logout(async function (err) {
 			if (err) {
 				req.flash("error", "An error occurred while logging out.");
 				return res.redirect("back");
+			}
+			if (userId) {
+				await auditService.log({
+					action: "user_logout",
+					performedBy: userId,
+					targetModel: "user",
+					targetId: userId,
+					ipAddress: req.ip
+				});
 			}
 			req.flash("success", "Logged-out successfully");
 			res.redirect("/");

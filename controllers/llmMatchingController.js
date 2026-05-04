@@ -1,6 +1,7 @@
 const matchingService = require("../services/matchingService.js");
 const donationService = require("../services/donationService.js");
 const llmService = require("../services/llmService.js");
+const auditService = require("../services/auditService.js");
 
 const llmMatchingController = {
 	async viewLlmMatches(req, res) {
@@ -21,6 +22,15 @@ const llmMatchingController = {
 
 			// Then get LLM analysis
 			const llmAnalysis = await llmService.analyzeMatches(donation, deterministicResults);
+
+			await auditService.log({
+				action: "llm_analysis_requested",
+				performedBy: req.user._id,
+				targetModel: "donation",
+				targetId: donation._id,
+				details: { matchCount: deterministicResults.matchCount, recommendation: llmAnalysis.recommendation?.substring(0, 200) },
+				ipAddress: req.ip
+			});
 
 			res.render("admin/llmMatchResults", {
 				title: "AI-Enhanced Match Analysis",

@@ -1,5 +1,6 @@
 const donationService = require("../services/donationService.js");
 const userService = require("../services/userService.js");
+const auditService = require("../services/auditService.js");
 
 const donorController = {
 	async getDashboard(req, res) {
@@ -24,7 +25,15 @@ const donorController = {
 				status: "pending",
 				donor: req.user._id
 			};
-			await donationService.create(donationData);
+			const donation = await donationService.create(donationData);
+			await auditService.log({
+				action: "donation_created",
+				performedBy: req.user._id,
+				targetModel: "donation",
+				targetId: donation._id,
+				details: { foodType: donationData.foodType, quantity: donationData.quantity },
+				ipAddress: req.ip
+			});
 			req.flash("success", "Donation request sent successfully");
 			res.redirect("/donor/donations/pending");
 		} catch (err) {
@@ -58,7 +67,15 @@ const donorController = {
 
 	async deleteRejected(req, res) {
 		try {
-			await donationService.deleteById(req.params.donationId);
+			const donationId = req.params.donationId;
+			await donationService.deleteById(donationId);
+			await auditService.log({
+				action: "donation_deleted",
+				performedBy: req.user._id,
+				targetModel: "donation",
+				targetId: donationId,
+				ipAddress: req.ip
+			});
 			res.redirect("/donor/donations/pending");
 		} catch (err) {
 			console.log(err);

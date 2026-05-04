@@ -1,5 +1,6 @@
 const matchingService = require("../services/matchingService.js");
 const donationService = require("../services/donationService.js");
+const auditService = require("../services/auditService.js");
 
 const matchingController = {
 	// Show match results for a specific donation
@@ -12,6 +13,14 @@ const matchingController = {
 			}
 
 			const results = await matchingService.findMatches(donation);
+			await auditService.log({
+				action: "match_generated",
+				performedBy: req.user._id,
+				targetModel: "donation",
+				targetId: donation._id,
+				details: { matchCount: results.matchCount, topScore: results.matches[0]?.totalScore || 0 },
+				ipAddress: req.ip
+			});
 			res.render("admin/matchResults", {
 				title: "Match Results",
 				donation,

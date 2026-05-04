@@ -14,6 +14,7 @@ const agentRoutes = require("./routes/agent.js");
 const recipientRoutes = require("./routes/recipient.js");
 const demandRoutes = require("./routes/demand.js");
 const matchingRoutes = require("./routes/matching.js");
+const llmMatchingRoutes = require("./routes/llmMatching.js");
 require("dotenv").config();
 require("./config/dbConnection.js")();
 require("./config/passport.js")(passport);
@@ -61,6 +62,7 @@ app.use(agentRoutes);
 app.use(recipientRoutes);
 app.use(demandRoutes);
 app.use(matchingRoutes);
+app.use(llmMatchingRoutes);
 app.use((req,res) => {
 	res.status(404).render("404page", { title: "Page not found" });
 });
