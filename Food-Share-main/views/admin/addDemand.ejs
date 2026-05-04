@@ -1,0 +1,61 @@
+<main class="d-flex">
+  <%- include('../partials/adminSidebar') %>
+
+  <div id="main-wrapper" class="flex-grow-1">
+    <div class="bg-white shadow-sm p-3 d-flex align-items-center">
+      <span class="me-3" id="sidebar-toggler-btn"><i class="fas fa-bars"></i></span>
+      <h5 class="m-0 text-primary">Add Demand</h5>
+    </div>
+
+    <div class="container my-4">
+      <form action="/admin/demand/add" method="POST" class="card shadow border-0 p-4">
+
+        <div class="row">
+          <div class="mb-3 col-md-6">
+            <label for="recipient" class="form-label">Recipient (NGO / Shelter)</label>
+            <select name="demand[recipient]" id="recipient" class="form-select" required>
+              <option value="" disabled selected>Select a recipient</option>
+              <% recipients.forEach(r => { %>
+                <option value="<%= r._id %>"><%= r.name %> (<%= r.type.replace('_', ' ') %>)</option>
+              <% }) %>
+            </select>
+          </div>
+          <div class="mb-3 col-md-6">
+            <label for="urgency" class="form-label">Urgency</label>
+            <select name="demand[urgency]" id="urgency" class="form-select" required>
+              <option value="" disabled selected>Select urgency</option>
+              <option value="low">Low</option>
+              <option value="medium">Medium</option>
+              <option value="high">High</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="mb-3 col-md-6">
+            <label for="foodType" class="form-label">Food Type Needed</label>
+            <input type="text" name="demand[foodType]" class="form-control" id="foodType" placeholder="e.g., Rice, Bread, Cooked meals" required>
+          </div>
+          <div class="mb-3 col-md-6">
+            <label for="quantityNeeded" class="form-label">Quantity Needed</label>
+            <input type="number" name="demand[quantityNeeded]" class="form-control" id="quantityNeeded" placeholder="e.g., 50" min="1" step="1" required>
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <label for="location" class="form-label">Delivery Location</label>
+          <input type="text" name="demand[location]" class="form-control" id="location" placeholder="Full address for delivery" required>
+        </div>
+
+        <div class="mb-3">
+          <label for="notes" class="form-label">Notes <span class="text-muted">(optional)</span></label>
+          <textarea name="demand[notes]" class="form-control" id="notes" rows="3" placeholder="Any additional info..."></textarea>
+        </div>
+
+        <div class="text-center mt-3">
+          <button type="submit" class="btn btn-primary w-50">Create Demand</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</main>

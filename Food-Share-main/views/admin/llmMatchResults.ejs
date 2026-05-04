@@ -1,0 +1,140 @@
+<main class="d-flex">
+  <%- include('../partials/adminSidebar') %>
+
+  <div id="main-wrapper" class="flex-grow-1">
+    <div class="bg-white shadow-sm p-3 d-flex align-items-center">
+      <span class="me-3" id="sidebar-toggler-btn"><i class="fas fa-bars"></i></span>
+      <h5 class="m-0 text-primary"><i class="fas fa-robot me-2"></i>AI-Enhanced Match Analysis</h5>
+    </div>
+
+    <div class="container my-4">
+
+      <!-- Donation Summary -->
+      <div class="card shadow-sm border-0 mb-4">
+        <div class="card-header bg-primary text-white">
+          <strong>Donation Details</strong>
+        </div>
+        <div class="card-body">
+          <div class="row g-2">
+            <div class="col-md-3"><strong>Food Type:</strong> <%= donation.foodType %></div>
+            <div class="col-md-3"><strong>Quantity:</strong> <%= donation.quantity %></div>
+            <div class="col-md-3"><strong>Location:</strong> <%= donation.address %></div>
+            <div class="col-md-3"><strong>Status:</strong>
+              <span class="badge bg-info text-capitalize"><%= donation.status %></span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- AI Recommendation -->
+      <div class="card shadow border-0 mb-4 border-start border-4 border-primary">
+        <div class="card-header bg-light">
+          <strong><i class="fas fa-lightbulb text-warning me-2"></i>AI Recommendation</strong>
+        </div>
+        <div class="card-body">
+          <p class="mb-0 fs-6"><%= llmAnalysis.recommendation %></p>
+        </div>
+      </div>
+
+      <!-- Freshness & Fulfillment Strategy -->
+      <div class="row mb-4">
+        <div class="col-md-6">
+          <div class="card shadow-sm border-0 h-100">
+            <div class="card-header bg-light">
+              <strong><i class="fas fa-clock text-info me-2"></i>Freshness Concern</strong>
+            </div>
+            <div class="card-body">
+              <p class="mb-0"><%= llmAnalysis.freshnessConcern || "N/A" %></p>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="card shadow-sm border-0 h-100">
+            <div class="card-header bg-light">
+              <strong><i class="fas fa-puzzle-piece text-success me-2"></i>Fulfillment Strategy</strong>
+            </div>
+            <div class="card-body">
+              <p class="mb-0"><%= llmAnalysis.fulfillmentStrategy || "N/A" %></p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Per-Match AI Analysis -->
+      <% if (llmAnalysis.analysis && llmAnalysis.analysis.length > 0) { %>
+        <h5 class="mb-3 text-secondary"><i class="fas fa-search-plus me-2"></i>Detailed AI Analysis</h5>
+
+        <% llmAnalysis.analysis.forEach((a, index) => { %>
+          <%
+            let verdictColor = 'secondary';
+            let verdictIcon = 'question-circle';
+            if (a.verdict === 'strongly_recommended') { verdictColor = 'success'; verdictIcon = 'check-double'; }
+            else if (a.verdict === 'recommended') { verdictColor = 'primary'; verdictIcon = 'check'; }
+            else if (a.verdict === 'acceptable') { verdictColor = 'warning'; verdictIcon = 'exclamation'; }
+            else if (a.verdict === 'not_recommended') { verdictColor = 'danger'; verdictIcon = 'times'; }
+
+            // Find matching deterministic score
+            let deterministicScore = '—';
+            if (deterministicResults.matches[a.matchIndex - 1]) {
+              deterministicScore = deterministicResults.matches[a.matchIndex - 1].totalScore;
+            }
+          %>
+          <div class="card shadow-sm border-0 mb-3 border-start border-4 border-<%= verdictColor %>">
+            <div class="card-header d-flex justify-content-between align-items-center bg-white">
+              <div>
+                <span class="badge bg-dark me-2">#<%= a.matchIndex %></span>
+                <strong><%= a.recipientName %></strong>
+              </div>
+              <div>
+                <span class="badge bg-<%= verdictColor %> me-2">
+                  <i class="fas fa-<%= verdictIcon %> me-1"></i><%= a.verdict.replace('_', ' ') %>
+                </span>
+                <span class="badge bg-secondary">Score: <%= deterministicScore %>/100</span>
+              </div>
+            </div>
+            <div class="card-body">
+              <p class="mb-2"><strong>Analysis:</strong> <%= a.reasoning %></p>
+
+              <% if (a.concerns && a.concerns.length > 0 && a.concerns[0] !== '') { %>
+                <div class="alert alert-warning py-2 mb-2">
+                  <strong><i class="fas fa-exclamation-triangle me-1"></i>Concerns:</strong>
+                  <ul class="mb-0 mt-1">
+                    <% a.concerns.forEach(c => { %>
+                      <li><%= c %></li>
+                    <% }) %>
+                  </ul>
+                </div>
+              <% } %>
+
+              <p class="mb-0 text-muted small">
+                <i class="fas fa-hand-point-right me-1"></i><strong>Suggested Action:</strong> <%= a.suggestedAction %>
+              </p>
+            </div>
+          </div>
+        <% }) %>
+      <% } %>
+
+      <!-- Raw LLM Response (debug, only shown if parsing failed) -->
+      <% if (llmAnalysis.rawResponse) { %>
+        <div class="card shadow-sm border-0 mb-4">
+          <div class="card-header bg-warning">
+            <strong>Raw AI Response (parsing failed)</strong>
+          </div>
+          <div class="card-body">
+            <pre class="mb-0" style="white-space: pre-wrap;"><%= llmAnalysis.rawResponse %></pre>
+          </div>
+        </div>
+      <% } %>
+
+      <!-- Navigation -->
+      <div class="text-center mt-4">
+        <a href="/admin/donation/matches/<%= donation._id %>" class="btn btn-outline-secondary me-2">
+          <i class="fas fa-calculator me-1"></i>View Deterministic Matches
+        </a>
+        <a href="/admin/donation/view/<%= donation._id %>" class="btn btn-outline-primary">
+          <i class="fas fa-arrow-left me-1"></i>Back to Donation
+        </a>
+      </div>
+    </div>
+  </div>
+</main>

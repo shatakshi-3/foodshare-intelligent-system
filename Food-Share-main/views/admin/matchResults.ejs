@@ -1,0 +1,126 @@
+<main class="d-flex">
+  <%- include('../partials/adminSidebar') %>
+
+  <div id="main-wrapper" class="flex-grow-1">
+    <div class="bg-white shadow-sm p-3 d-flex align-items-center">
+      <span class="me-3" id="sidebar-toggler-btn"><i class="fas fa-bars"></i></span>
+      <h5 class="m-0 text-primary">Match Results</h5>
+    </div>
+
+    <div class="container my-4">
+
+      <!-- Donation Summary Card -->
+      <div class="card shadow-sm border-0 mb-4">
+        <div class="card-header bg-primary text-white">
+          <strong>Donation Details</strong>
+        </div>
+        <div class="card-body">
+          <div class="row g-2">
+            <div class="col-md-3"><strong>Food Type:</strong> <%= donation.foodType %></div>
+            <div class="col-md-3"><strong>Quantity:</strong> <%= donation.quantity %></div>
+            <div class="col-md-3"><strong>Location:</strong> <%= donation.address %></div>
+            <div class="col-md-3"><strong>Status:</strong> 
+              <span class="badge bg-info text-capitalize"><%= donation.status %></span>
+            </div>
+          </div>
+          <div class="mt-2 text-muted small">
+            Donor: <%= donation.donor ? donation.donor.firstName + ' ' + donation.donor.lastName : 'N/A' %>
+          </div>
+        </div>
+      </div>
+
+      <!-- Scoring Weights -->
+      <div class="alert alert-light border mb-4">
+        <strong>Scoring Weights:</strong>
+        Food Type: <span class="badge bg-secondary"><%= results.weights.foodType * 100 %>%</span>
+        Urgency: <span class="badge bg-secondary"><%= results.weights.urgency * 100 %>%</span>
+        Quantity: <span class="badge bg-secondary"><%= results.weights.quantity * 100 %>%</span>
+        Location: <span class="badge bg-secondary"><%= results.weights.location * 100 %>%</span>
+        &nbsp;&nbsp;|&nbsp;&nbsp;
+        <strong><%= results.matchCount %> demand(s) found</strong>
+      </div>
+
+      <% if (results.matches.length === 0) { %>
+        <div class="alert alert-warning">No open demands found to match against this donation.</div>
+      <% } else { %>
+
+        <!-- Match Cards -->
+        <% results.matches.forEach((match, index) => { %>
+          <div class="card shadow-sm border-0 mb-3 <%= match.totalScore >= 70 ? 'border-start border-success border-4' : match.totalScore >= 40 ? 'border-start border-warning border-4' : 'border-start border-secondary border-4' %>">
+            <div class="card-header d-flex justify-content-between align-items-center bg-white">
+              <div>
+                <span class="badge bg-dark me-2">#<%= index + 1 %></span>
+                <strong><%= match.demand.recipient ? match.demand.recipient.name : 'Unknown Recipient' %></strong>
+                <span class="badge bg-<%= match.demand.urgency === 'high' ? 'danger' : match.demand.urgency === 'medium' ? 'warning' : 'success' %> ms-2 text-capitalize">
+                  <%= match.demand.urgency %> urgency
+                </span>
+              </div>
+              <div>
+                <span class="badge fs-6 bg-<%= match.totalScore >= 70 ? 'success' : match.totalScore >= 40 ? 'warning text-dark' : 'secondary' %>">
+                  Score: <%= match.totalScore %>/100
+                </span>
+              </div>
+            </div>
+            <div class="card-body">
+              <!-- Demand Info -->
+              <div class="row g-2 mb-3">
+                <div class="col-md-3"><strong>Food Type:</strong> <%= match.demand.foodType %></div>
+                <div class="col-md-3"><strong>Qty Needed:</strong> <%= match.demand.quantityNeeded - match.demand.quantityFulfilled %> remaining</div>
+                <div class="col-md-3"><strong>Location:</strong> <%= match.demand.location %></div>
+                <div class="col-md-3"><strong>Status:</strong>
+                  <span class="badge bg-<%= match.demand.status === 'open' ? 'primary' : 'info' %> text-capitalize">
+                    <%= match.demand.status.replace('_', ' ') %>
+                  </span>
+                </div>
+              </div>
+
+              <!-- Score Breakdown -->
+              <div class="table-responsive">
+                <table class="table table-sm table-bordered mb-0">
+                  <thead class="table-light">
+                    <tr>
+                      <th>Factor</th>
+                      <th>Raw Score</th>
+                      <th>Weight</th>
+                      <th>Weighted</th>
+                      <th>Reasoning</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <% Object.entries(match.breakdown).forEach(([factor, data]) => { %>
+                      <tr>
+                        <td class="text-capitalize fw-bold"><%= factor.replace(/([A-Z])/g, ' $1').trim() %></td>
+                        <td>
+                          <div class="progress" style="min-width:80px; height:20px">
+                            <div class="progress-bar bg-<%= data.score >= 70 ? 'success' : data.score >= 40 ? 'warning' : 'danger' %>"
+                                 style="width: <%= data.score %>%"><%= data.score %></div>
+                          </div>
+                        </td>
+                        <td><%= (data.weight * 100) %>%</td>
+                        <td><strong><%= data.weighted %></strong></td>
+                        <td class="small text-muted"><%= data.reason %></td>
+                      </tr>
+                    <% }) %>
+                  </tbody>
+                </table>
+              </div>
+
+              <!-- Summary -->
+              <div class="alert alert-info mt-3 mb-0 small">
+                <i class="fas fa-info-circle me-1"></i> <%= match.summary %>
+              </div>
+            </div>
+          </div>
+        <% }) %>
+
+      <% } %>
+
+      <div class="text-center mt-4">
+        <a href="/admin/donation/ai-matches/<%= donation._id %>" class="btn btn-primary me-2">
+          <i class="fas fa-robot me-1"></i>AI Analysis
+        </a>
+        <a href="/admin/donation/view/<%= donation._id %>" class="btn btn-outline-primary">Back to Donation</a>
+      </div>
+    </div>
+  </div>
+</main>

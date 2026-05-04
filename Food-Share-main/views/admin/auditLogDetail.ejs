@@ -1,0 +1,88 @@
+<main class="d-flex">
+  <%- include('../partials/adminSidebar') %>
+
+  <div id="main-wrapper" class="flex-grow-1">
+    <div class="bg-white shadow-sm p-3 d-flex align-items-center">
+      <span class="me-3" id="sidebar-toggler-btn"><i class="fas fa-bars"></i></span>
+      <h5 class="m-0 text-primary"><i class="fas fa-search me-2"></i>Audit Log Detail</h5>
+    </div>
+
+    <div class="container my-4">
+      <div class="card shadow-sm border-0 rounded-3 p-4">
+        <div class="row g-3">
+          <div class="col-md-6">
+            <strong>Action:</strong>
+            <span class="badge bg-primary text-capitalize"><%= log.action.replace(/_/g, ' ') %></span>
+          </div>
+          <div class="col-md-6">
+            <strong>Timestamp:</strong>
+            <span><%= new Date(log.createdAt).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "long" }) %></span>
+          </div>
+          <div class="col-md-6">
+            <strong>Performed By:</strong>
+            <% if (log.performedBy) { %>
+              <span><%= log.performedBy.firstName %> <%= log.performedBy.lastName %> (<%= log.performedBy.role %>)</span>
+            <% } else { %>
+              <span class="text-muted">System</span>
+            <% } %>
+          </div>
+          <div class="col-md-6">
+            <strong>Target:</strong>
+            <span class="text-capitalize"><%= log.targetModel || 'N/A' %></span>
+            <% if (log.targetId) { %>
+              <code class="small ms-1"><%= log.targetId %></code>
+            <% } %>
+          </div>
+          <% if (log.ipAddress) { %>
+            <div class="col-md-6">
+              <strong>IP Address:</strong> <code><%= log.ipAddress %></code>
+            </div>
+          <% } %>
+        </div>
+
+        <hr class="my-3">
+
+        <!-- Hash Chain -->
+        <h6 class="text-secondary">SHA-256 Hash Chain</h6>
+        <div class="bg-light p-3 rounded mb-3">
+          <div class="mb-2">
+            <strong class="small">Current Hash:</strong>
+            <code class="d-block font-monospace small text-break"><%= log.hash %></code>
+          </div>
+          <div>
+            <strong class="small">Previous Hash:</strong>
+            <code class="d-block font-monospace small text-break"><%= log.previousHash || 'genesis (first entry)' %></code>
+          </div>
+        </div>
+
+        <!-- Details -->
+        <% if (log.details) { %>
+          <h6 class="text-secondary">Details</h6>
+          <pre class="bg-light p-3 rounded small" style="white-space: pre-wrap;"><%= JSON.stringify(log.details, null, 2) %></pre>
+        <% } %>
+
+        <!-- State Changes -->
+        <% if (log.previousState || log.newState) { %>
+          <div class="row">
+            <% if (log.previousState) { %>
+              <div class="col-md-6">
+                <h6 class="text-secondary">Previous State</h6>
+                <pre class="bg-light p-3 rounded small" style="white-space: pre-wrap;"><%= JSON.stringify(log.previousState, null, 2) %></pre>
+              </div>
+            <% } %>
+            <% if (log.newState) { %>
+              <div class="col-md-6">
+                <h6 class="text-secondary">New State</h6>
+                <pre class="bg-light p-3 rounded small" style="white-space: pre-wrap;"><%= JSON.stringify(log.newState, null, 2) %></pre>
+              </div>
+            <% } %>
+          </div>
+        <% } %>
+
+        <div class="text-center mt-4">
+          <a href="/admin/audit" class="btn btn-outline-primary">Back to Audit Logs</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>

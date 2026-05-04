@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Admin Dashboard</title>
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- FontAwesome -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+
+<main class="d-flex">
+  <!-- Sidebar -->
+  <%- include('../partials/adminSidebar') %>
+
+  <!-- Main Content -->
+  <div id="main-wrapper" class="flex-grow-1">
+
+    <!-- Top Bar -->
+    <div class="bg-white shadow-sm p-3 d-flex align-items-center">
+      <span class="me-3" id="sidebar-toggler-btn"><i class="fas fa-bars"></i></span>
+      <h5 class="m-0 text-primary">Dashboard</h5>
+    </div>
+
+    <!-- Statistics Grid -->
+    <div class="container my-4">
+      <div class="row g-4">
+        <% const stats = [
+          { label: "Admins", value: numAdmins, color: "primary", icon: "fa-user-shield" },
+          { label: "Donors", value: numDonors, color: "success", icon: "fa-hand-holding-heart" },
+          { label: "Agents", value: numAgents, color: "info", icon: "fa-user-tie" },
+          { label: "New Donation Requests", value: numPendingDonations, color: "warning", icon: "fa-bell" },
+          { label: "Donations to Assign", value: numAcceptedDonations, color: "secondary", icon: "fa-tasks" },
+          { label: "Uncollected Donations", value: numAssignedDonations, color: "danger", icon: "fa-truck-loading" },
+          { label: "Collected Donations", value: numCollectedDonations, color: "success", icon: "fa-box-open" }
+        ]; %>
+
+        <% stats.forEach(stat => { %>
+          <div class="col-sm-6 col-lg-4">
+            <div class="card text-white bg-<%= stat.color %> shadow h-100">
+              <div class="card-body d-flex flex-column justify-content-center align-items-start">
+                <div class="fs-1 fw-bold"><%= stat.value %></div>
+                <div class="fs-5 d-flex align-items-center">
+                  <i class="fas <%= stat.icon %> me-2"></i> <%= stat.label %>
+                </div>
+              </div>
+            </div>
+          </div>
+        <% }) %>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<!-- Bootstrap JS (optional for responsive elements like sidebar toggling) -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
