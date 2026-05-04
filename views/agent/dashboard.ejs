@@ -1,0 +1,40 @@
+<main class="d-flex">
+  <!-- Sidebar -->
+  <%- include('../partials/agentSidebar') %>
+
+  <!-- Main Content -->
+  <div id="main-wrapper" class="flex-grow-1">
+
+    <!-- Header -->
+    <div class="bg-white shadow-sm p-3 d-flex align-items-center">
+      <span class="me-3" id="sidebar-toggler-btn"><i class="fas fa-bars"></i></span>
+      <h5 class="m-0 text-primary">Dashboard</h5>
+    </div>
+
+    <!-- Dashboard Stats -->
+    <div class="container my-4">
+      <div class="row g-4">
+        <!-- Pending Collections -->
+        <div class="col-md-6">
+          <div class="card bg-primary text-white shadow-sm border-0 rounded-4 h-100">
+            <div class="card-body text-center">
+              <h2 class="card-title"><%= numAssignedDonations %></h2>
+              <p class="card-text fs-5">Donations Not Collected Yet</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Collected Donations -->
+        <div class="col-md-6">
+          <div class="card bg-success text-white shadow-sm border-0 rounded-4 h-100">
+            <div class="card-body text-center">
+              <h2 class="card-title"><%= numCollectedDonations %></h2>
+              <p class="card-text fs-5">Donations Collected by You</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</main>

@@ -1,0 +1,58 @@
+<main class="d-flex">
+  <%- include('../partials/adminSidebar') %>
+
+  <div id="main-wrapper" class="flex-grow-1">
+    <div class="bg-white shadow-sm p-3 d-flex align-items-center justify-content-between">
+      <div class="d-flex align-items-center">
+        <span class="me-3" id="sidebar-toggler-btn"><i class="fas fa-bars"></i></span>
+        <h5 class="m-0 text-primary">Demands</h5>
+      </div>
+      <a href="/admin/demand/add" class="btn btn-primary btn-sm">+ Add Demand</a>
+    </div>
+
+    <div class="container my-4">
+      <% if (demands.length === 0) { %>
+        <div class="alert alert-info">No demands registered yet. Add one to get started.</div>
+      <% } else { %>
+        <div class="table-responsive">
+          <table class="table table-hover bg-white shadow-sm rounded">
+            <thead class="table-dark">
+              <tr>
+                <th>Recipient</th>
+                <th>Food Type</th>
+                <th>Qty Needed</th>
+                <th>Urgency</th>
+                <th>Status</th>
+                <th>Created</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% demands.forEach(d => { %>
+                <tr>
+                  <td><%= d.recipient ? d.recipient.name : 'N/A' %></td>
+                  <td><%= d.foodType %></td>
+                  <td><%= d.quantityNeeded %></td>
+                  <td>
+                    <span class="badge bg-<%= d.urgency === 'high' ? 'danger' : d.urgency === 'medium' ? 'warning' : 'success' %>">
+                      <%= d.urgency %>
+                    </span>
+                  </td>
+                  <td>
+                    <span class="badge bg-<%= d.status === 'open' ? 'primary' : d.status === 'partially_fulfilled' ? 'info' : d.status === 'fulfilled' ? 'success' : 'secondary' %> text-capitalize">
+                      <%= d.status.replace('_', ' ') %>
+                    </span>
+                  </td>
+                  <td><%= d.createdAt.toLocaleDateString("en-IN", { dateStyle: "medium" }) %></td>
+                  <td>
+                    <a href="/admin/demand/view/<%= d._id %>" class="btn btn-sm btn-outline-primary">View</a>
+                  </td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+      <% } %>
+    </div>
+  </div>
+</main>
