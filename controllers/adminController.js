@@ -5,12 +5,13 @@ const auditService = require("../services/auditService.js");
 const adminController = {
 	async getDashboard(req, res) {
 		try {
-			const [numAdmins, numDonors, numAgents, donationStats] = await Promise.all([
-				userService.countByRole("admin"),
-				userService.countByRole("donor"),
-				userService.countByRole("agent"),
+			const [userCounts, donationStats] = await Promise.all([
+				userService.getUserCountsByRole(),
 				donationService.getAdminDashboardStats()
 			]);
+			const numAdmins = userCounts.admin || 0;
+			const numDonors = userCounts.donor || 0;
+			const numAgents = userCounts.agent || 0;
 			res.render("admin/dashboard", {
 				title: "Dashboard",
 				numAdmins, numDonors, numAgents, ...donationStats
@@ -24,8 +25,10 @@ const adminController = {
 
 	async getPendingDonations(req, res) {
 		try {
-			const pendingDonations = await donationService.getAdminPendingDonations();
-			res.render("admin/pendingDonations", { title: "Pending Donations", pendingDonations });
+			const page = parseInt(req.query.page) || 1;
+			const limit = parseInt(req.query.limit) || 10;
+			const result = await donationService.getAdminPendingDonations(page, limit);
+			res.render("admin/pendingDonations", { title: "Pending Donations", ...result });
 		} catch (err) {
 			console.log(err);
 			req.flash("error", "Some error occurred on the server.");
@@ -35,8 +38,10 @@ const adminController = {
 
 	async getPreviousDonations(req, res) {
 		try {
-			const previousDonations = await donationService.getAdminPreviousDonations();
-			res.render("admin/previousDonations", { title: "Previous Donations", previousDonations });
+			const page = parseInt(req.query.page) || 1;
+			const limit = parseInt(req.query.limit) || 10;
+			const result = await donationService.getAdminPreviousDonations(page, limit);
+			res.render("admin/previousDonations", { title: "Previous Donations", ...result });
 		} catch (err) {
 			console.log(err);
 			req.flash("error", "Some error occurred on the server.");

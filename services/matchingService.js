@@ -1,4 +1,5 @@
 const Demand = require("../models/demand.js");
+const logger = require("../utils/logger.js");
 
 // Scoring weights — must sum to 1.0
 const WEIGHTS = {
@@ -203,7 +204,7 @@ const matchingService = {
 			.filter(match => match.totalScore > 0)
 			.sort((a, b) => b.totalScore - a.totalScore);
 
-		return {
+		const result = {
 			donation: {
 				id: donation._id,
 				foodType: donation.foodType,
@@ -216,6 +217,10 @@ const matchingService = {
 			weights: WEIGHTS,
 			generatedAt: new Date().toISOString()
 		};
+		
+		logger.info(`Generated ${matches.length} matches for donation ${donation._id}`, { action: "match_generated", targetId: donation._id, matchCount: matches.length });
+		
+		return result;
 	},
 
 	// Exposed for testing — individual scoring functions

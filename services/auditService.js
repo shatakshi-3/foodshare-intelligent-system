@@ -1,5 +1,6 @@
 const crypto = require("crypto");
 const AuditLog = require("../models/auditLog.js");
+const logger = require("../utils/logger.js");
 
 // Generate SHA-256 hash of the log entry data
 function generateHash(data, previousHash) {
@@ -53,7 +54,9 @@ const auditService = {
 			ipAddress
 		});
 
-		return logEntry.save();
+		const savedLog = await logEntry.save();
+		logger.info(`Audit log created for action: ${action}`, { action: "audit_log_created", logId: savedLog._id, targetAction: action });
+		return savedLog;
 	},
 
 	// Get paginated audit logs with optional filters

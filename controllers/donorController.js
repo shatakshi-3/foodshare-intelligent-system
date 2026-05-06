@@ -45,8 +45,10 @@ const donorController = {
 
 	async getPendingDonations(req, res) {
 		try {
-			const pendingDonations = await donationService.getDonorPendingDonations(req.user._id);
-			res.render("donor/pendingDonations", { title: "Pending Donations", pendingDonations });
+			const page = parseInt(req.query.page) || 1;
+			const limit = parseInt(req.query.limit) || 10;
+			const result = await donationService.getDonorPendingDonations(req.user._id, page, limit);
+			res.render("donor/pendingDonations", { title: "Pending Donations", ...result });
 		} catch (err) {
 			console.log(err);
 			req.flash("error", "Some error occurred on the server.");
@@ -56,8 +58,10 @@ const donorController = {
 
 	async getPreviousDonations(req, res) {
 		try {
-			const previousDonations = await donationService.getDonorPreviousDonations(req.user._id);
-			res.render("donor/previousDonations", { title: "Previous Donations", previousDonations });
+			const page = parseInt(req.query.page) || 1;
+			const limit = parseInt(req.query.limit) || 10;
+			const result = await donationService.getDonorPreviousDonations(req.user._id, page, limit);
+			res.render("donor/previousDonations", { title: "Previous Donations", ...result });
 		} catch (err) {
 			console.log(err);
 			req.flash("error", "Some error occurred on the server.");

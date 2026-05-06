@@ -17,8 +17,14 @@ const userService = {
 		return User.findByIdAndUpdate(userId, updateData, { new: true });
 	},
 
-	async countByRole(role) {
-		return User.countDocuments({ role });
+	async getUserCountsByRole() {
+		const stats = await User.aggregate([
+			{ $group: { _id: "$role", count: { $sum: 1 } } }
+		]);
+		return stats.reduce((acc, curr) => {
+			acc[curr._id] = curr.count;
+			return acc;
+		}, {});
 	},
 
 	async findByRole(role) {

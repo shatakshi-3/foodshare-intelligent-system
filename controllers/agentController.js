@@ -16,8 +16,10 @@ const agentController = {
 
 	async getPendingCollections(req, res) {
 		try {
-			const pendingCollections = await donationService.getAgentPendingCollections(req.user._id);
-			res.render("agent/pendingCollections", { title: "Pending Collections", pendingCollections });
+			const page = parseInt(req.query.page) || 1;
+			const limit = parseInt(req.query.limit) || 10;
+			const result = await donationService.getAgentPendingCollections(req.user._id, page, limit);
+			res.render("agent/pendingCollections", { title: "Pending Collections", ...result });
 		} catch (err) {
 			console.log(err);
 			req.flash("error", "Some error occurred on the server.");
@@ -27,8 +29,10 @@ const agentController = {
 
 	async getPreviousCollections(req, res) {
 		try {
-			const previousCollections = await donationService.getAgentPreviousCollections(req.user._id);
-			res.render("agent/previousCollections", { title: "Previous Collections", previousCollections });
+			const page = parseInt(req.query.page) || 1;
+			const limit = parseInt(req.query.limit) || 10;
+			const result = await donationService.getAgentPreviousCollections(req.user._id, page, limit);
+			res.render("agent/previousCollections", { title: "Previous Collections", ...result });
 		} catch (err) {
 			console.log(err);
 			req.flash("error", "Some error occurred on the server.");
